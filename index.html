@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="nl">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="UTF-8" />
+        <title>Ietsandersaandemuur.nl</title>
+        <style>
+            body {
+                background: linear-gradient(145deg, #ffffff, #e1e1e1);
+                font-family: sans-serif;
+                color: rgb(43, 43, 43);
+                padding: 0;
+                margin: 0;
+                min-height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            #banner {
+                border-radius: 12px;
+                padding: 20px;
+                box-sizing: border-box;
+                text-align: center;
+                opacity: 0;
+                transition: opacity 1s ease-in-out;
+                max-width: 1200px;
+                width: 90%;
+            }
+
+            #banner.show {
+                opacity: 1;
+            }
+
+            .aspect-16x9 {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }
+
+            .aspect-16x9 {
+                flex-direction: row;
+                max-width: 960px;
+            }
+
+            h1 {
+                font-size: 24px;
+                margin: 10px 0;
+                text-align: left;
+            }
+
+            h2 {
+                font-size: 18px;
+                color: #000;
+                text-align: left;
+                margin: 0 0 15px 0;
+            }
+
+            .desc {
+                font-size: 14px;
+                text-align: left;
+                line-height: 1.4;
+                margin: 15px 0;
+            }
+
+            img.poster {
+                width: 100%;
+                height: auto;
+                max-height: 100%;
+                object-fit: contain;
+                border-radius: 12px;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+                animation: scaleFadeIn 1.4s ease-out forwards;
+            }
+
+            .aspect-16x9 .left {
+                flex: 1;
+                display: flex;
+                justify-content: center;
+            }
+
+            .aspect-16x9 .right {
+                flex: 2;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                padding: 0 20px;
+            }
+
+            /* Debug buttons */
+            #debug-tools {
+                position: absolute;
+                top: 12px;
+                left: 12px;
+                display: flex;
+                gap: 8px;
+                z-index: 9999;
+            }
+
+            #debug-tools button {
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                border: 1px solid #444;
+                border-radius: 6px;
+                padding: 4px 10px;
+                cursor: pointer;
+                font-size: 12px;
+                transition: background 0.2s ease;
+            }
+
+            #debug-tools button:hover {
+                background: rgba(255, 255, 255, 0.2);
+            }
+
+            /* Animation */
+            @keyframes scaleFadeIn {
+                0% {
+                    opacity: 0;
+                    transform: scale(0.95);
+                }
+                100% {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+
+            /* RESPONSIVE Design */
+            @media (max-width: 750px), (max-device-width: 750px) {
+                .aspect-16x9 {
+                    flex-direction: column;
+                    align-items: center;
+                    max-width: 95vw;
+                }
+
+                .aspect-16x9 .right {
+                    padding: 10px 0;
+                }
+
+                img.poster {
+                    max-width: 90vw;
+                    height: auto;
+                }
+
+                h1 {
+                    font-size: 20px;
+                }
+
+                h2 {
+                    font-size: 16px;
+                }
+
+                .desc {
+                    font-size: 13px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div id="banner"></div>
+        <div id="debug-tools" style="display: none">
+            <button data-aspect="1x1">1x1</button>
+            <button data-aspect="16x9">16x9</button>
+            <button data-aspect="9x16">9x16</button>
+        </div>
+        <script>
+            const banner = document.getElementById('banner');
+            const queryParams = new URLSearchParams(window.location.search);
+            const aspect = queryParams.get('aspect') || '16x9';
+            banner.classList.add(`aspect-${aspect}`);
+
+            const isDebug = queryParams.get('debug') === 'true';
+            const debugTools = document.getElementById('debug-tools');
+
+            if (isDebug) {
+                debugTools.style.display = 'flex';
+                debugTools.querySelectorAll('button').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const newAspect = btn.dataset.aspect;
+                        const newUrl = new URL(window.location.href);
+                        newUrl.searchParams.set('aspect', newAspect);
+                        window.location.href = newUrl.toString();
+                    });
+                });
+            }
+
+            function fadeOut() {
+                banner.classList.remove('show');
+            }
+
+            function fadeIn() {
+                setTimeout(() => banner.classList.add('show'), 100);
+            }
+
+            let images = [];
+            let currentIndex = 0;
+            let bannerData = null;
+
+            function buildSocialLinks(data) {
+                const socials = ['facebook', 'tiktok', 'instagram', 'linkedin', 'twitter', 'youtube'];
+                return socials
+                    .filter((key) => data[key])
+                    .map((key) => `<a href="${data[key]}" target="_blank" style="margin-right: 10px; color: #000;">${key}</a>`)
+                    .join('');
+            }
+
+            function renderBanner() {
+                fadeOut();
+
+                setTimeout(() => {
+                    const currentImage = images[currentIndex % images.length];
+                    const socialLinks = buildSocialLinks(bannerData);
+
+                    if (aspect === '16x9') {
+                        banner.innerHTML = `
+                            <div class="left">
+                                <img class="poster" src="${currentImage}" alt="${bannerData.title}" />
+                            </div>
+                            <div class="right">
+                                <h1>🎨 ${bannerData.title}</h1>
+                                <div class="desc">${bannerData.content.replace(/\n/g, '<br>')}</div>
+                                <div class="desc">
+                                    <strong>Contact:</strong><br>
+                                    ${bannerData.contact.name}<br>
+                                    ${bannerData.contact.address}<br>
+                                    ${bannerData.contact.postcode} ${bannerData.contact.city}<br>
+                                    Telefoon: ${bannerData.contact.phone}<br>
+                                    E-mail: <a href="mailto:${bannerData.contact.email}" style="color: #000;">${bannerData.contact.email}</a>
+                                </div>
+                                <div class="desc"><strong>Social:</strong><br>${socialLinks}</div>
+                            </div>
+                        `;
+                    } else {
+                        banner.innerHTML = `
+                            <h1>🎨 ${bannerData.title}</h1>
+                            <img class="poster" src="${currentImage}" alt="${bannerData.title}" />
+                            <div class="desc">${bannerData.content.replace(/\n/g, '<br>')}</div>
+                            <div class="desc">
+                                <strong>Contact:</strong><br>
+                                ${bannerData.contact.name}<br>
+                                ${bannerData.contact.address}<br>
+                                ${bannerData.contact.postcode} ${bannerData.contact.city}<br>
+                                Telefoon: ${bannerData.contact.phone}<br>
+                                E-mail: <a href="mailto:${bannerData.contact.email}" style="color: #000;">${bannerData.contact.email}</a>
+                            </div>
+                            <div class="desc"><strong>Social:</strong><br>${socialLinks}</div>
+                        `;
+                    }
+
+                    fadeIn();
+                }, 300);
+            }
+
+            function cycleImages() {
+                renderBanner();
+                currentIndex = (currentIndex + 1) % images.length;
+            }
+
+            // Initial load from main.json
+            fetch('json/main.json')
+                .then((response) => response.json())
+                .then((data) => {
+                    bannerData = data;
+                    images = data.images || [];
+                    if (!images.length) {
+                        banner.innerHTML = '<p style="color: red;">Geen afbeeldingen in main.json gevonden.</p>';
+                        return;
+                    }
+
+                    cycleImages(); // Initial render
+                    setInterval(cycleImages, 10000); // Every 10 sec
+                })
+                .catch((error) => {
+                    console.error('Fout bij het laden van main.json', error);
+                    banner.innerHTML = '<p style="color: red;">Fout bij het laden van main.json</p>';
+                });
+        </script>
+    </body>
+</html>
