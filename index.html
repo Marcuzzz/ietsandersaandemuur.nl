@@ -262,6 +262,7 @@
                 .then((data) => {
                     bannerData = data;
                     images = data.images || [];
+                    shuffleArray(images);
                     if (!images.length) {
                         banner.innerHTML = '<p style="color: red;">Geen afbeeldingen in main.json gevonden.</p>';
                         return;
