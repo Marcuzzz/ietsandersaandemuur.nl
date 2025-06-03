@@ -218,9 +218,6 @@
 
                     if (aspect === '16x9') {
                         banner.innerHTML = `
-                            <div class="left">
-                                <img class="poster" src="${currentImage}" alt="${bannerData.title}" />
-                            </div>
                             <div class="right">
                                 <h1>🎨 ${bannerData.title}</h1>
                                 <div class="desc">${bannerData.content.replace(/\n/g, '<br>')}</div>
@@ -233,6 +230,9 @@
                                     E-mail: <a href="mailto:${bannerData.contact.email}" style="color: #000;">${bannerData.contact.email}</a>
                                 </div>
                                 <div class="desc"><strong>Social:</strong><br>${socialLinks}</div>
+                            </div>
+                            <div class="left">
+                                <img class="poster" src="${currentImage}" alt="${bannerData.title}" />
                             </div>
                         `;
                     } else {
