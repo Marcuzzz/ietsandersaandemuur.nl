@@ -208,14 +208,27 @@
                 const poster = document.getElementById('poster');
                 if (!poster || images.length === 0) return;
 
+                // Start fade-out
                 poster.classList.add('fade-out');
 
                 setTimeout(() => {
                     const index = getRandomIndex();
-                    poster.src = images[index];
-                    poster.alt = bannerData.title;
-                    poster.classList.remove('fade-out');
-                }, 800); // match fade-out duration
+                    const newSrc = images[index];
+
+                    // Preload image before showing
+                    const tempImg = new Image();
+                    tempImg.onload = () => {
+                        poster.src = newSrc;
+                        poster.alt = bannerData.title;
+
+                        // Trigger reflow to restart transition
+                        void poster.offsetWidth;
+
+                        // Fade back in
+                        poster.classList.remove('fade-out');
+                    };
+                    tempImg.src = newSrc;
+                }, 1000); // Wait for fade-out to complete
             }
 
             fetch('json/main.json')
